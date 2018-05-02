@@ -1,17 +1,15 @@
 import os
 from flask import Flask
+from curlbin import log_config
 
-app = Flask(__name__)
-app.config.from_object('{{cookiecutter.package_name}}.default_settings')
-app.config.from_envvar('{{cookiecutter.package_name.upper()}}_SETTINGS')
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+log_config.set_logging(os.path.join(BASE_DIR, 'logs'))
 
-if not app.debug:
-    import logging
-    from logging.handlers import TimedRotatingFileHandler
-    # https://docs.python.org/3.6/library/logging.handlers.html#timedrotatingfilehandler
-    file_handler = TimedRotatingFileHandler(os.path.join(app.config['LOG_DIR'], '{{cookiecutter.package_name}}.log'), 'midnight')
-    file_handler.setLevel(logging.WARNING)
-    file_handler.setFormatter(logging.Formatter('<%(asctime)s> <%(levelname)s> %(message)s'))
-    app.logger.addHandler(file_handler)
+app = Flask('curlbin')
+app.config.from_object('curlbin.default_settings')
 
-import {{cookiecutter.package_name}}.views
+import dotenv
+
+dotenv.load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+import curlbin.views  # Must be loaded at last
